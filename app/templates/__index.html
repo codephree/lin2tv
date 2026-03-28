@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Link Shortener</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      background: linear-gradient(135deg, #f8fafc 0%, #e0e7ff 100%);
+      min-height: 100vh;
+    }
+    .container {
+      max-width: 500px;
+      margin-top: 60px;
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 8px 32px rgba(31, 38, 135, 0.1);
+      padding: 32px;
+    }
+    .result {
+      margin-top: 20px;
+      font-size: 1.1rem;
+      font-weight: 500;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2 class="mb-4 text-center">🔗 Link to TV</h2>
+    <!-- Submit Link Form -->
+    <form id="generateForm">
+      <div class="mb-3">
+        <label for="linkInput" class="form-label">Enter Link to Generate Code</label>
+        <input type="url" class="form-control" id="linkInput" placeholder="https://example.com" required>
+      </div>
+      <button type="submit" class="btn btn-primary w-100">Generate Code</button>
+    </form>
+    <div id="generateResult" class="result text-success"></div>
+    <hr class="my-4">
+    <!-- Retrieve Link Form -->
+    <form id="retrieveForm">
+      <div class="mb-3">
+        <label for="codeInput" class="form-label">Enter Code to Retrieve Link</label>
+        <input type="text" class="form-control" id="codeInput" placeholder="e.g. XyZ123" required>
+      </div>
+      <button type="submit" class="btn btn-success w-100">Retrieve Link</button>
+    </form>
+    <div id="retrieveResult" class="result text-info"></div>
+  </div>
+
+
+  
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <script>
+    // Generate code from link
+    $('#generateForm').submit(function(e) {
+      e.preventDefault();
+      const link = $('#linkInput').val();
+      $('#generateResult').text('Generating...');
+      $.ajax({
+        url: '/return-url',
+        type: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify({ url: link }),
+        success: function(data) {
+          $('#generateResult').html('Your code: <span class="badge bg-primary">' + data.code + '</span>');
+        },
+        error: function() {
+          $('#generateResult').text('Error generating code.');
+        }
+      });
+    });
+
+    // Retrieve link from code
+    $('#retrieveForm').submit(function(e) {
+      e.preventDefault();
+      const code = $('#codeInput').val();
+      $('#retrieveResult').text('Retrieving...');
+      $.get('/retrieve-url/' + code, function(data) {
+        $('#retrieveResult').html('Your link: <a href="' + data.original_url + '" target="_blank">' + data.original_url + '</a>');
+      }).fail(function() {
+        $('#retrieveResult').text('Error retrieving link.');
+      });
+    });
+    
+  </script>
+</body>
+</html>
