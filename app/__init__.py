@@ -31,12 +31,17 @@ import random
 import string
 import os
 import datetime
+import logging
+
 
 # Initialize the Flask application
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///links.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = 'djxnsbehejv8s9d8f7s6d5f4g3h2j1k0l9m8n7o6p5q4r3t2u1v0w9x8y7z6a5b4c3d2e1f0g9h8i7j6k5l4m3n2o1p0q9r8s7t6u5v4w3x2y1z0'
+
+logging.basicConfig(level=logging.INFO)
+
 
 # Initialize the database
 db = SQLAlchemy(app)
@@ -63,6 +68,7 @@ if not os.path.exists('instance/links.db'):
 @app.route('/')
 def index():
         # return frontend template
+        app.logger.info("Received request for the homepage.")
         return render_template('index.html')
         # return jsonify({'message': 'Welcome to the URL Shortener API!'})
 
@@ -80,7 +86,7 @@ def urtl():
         db.session.commit()
 
         now = datetime.datetime.utcnow()
-
+        app.logger.info(f"Generated code {generated_code} for URL: {url} at {now}")    
         # logic to return the url
         return jsonify({'message': 'URL returned successfully!', 'url': url, 'code': generated_code, 'created_at': now}), 200
     
@@ -98,11 +104,12 @@ def retrieve_url(code):
         if (datetime.datetime.utcnow() - expiry_time).total_seconds() > 0:  # Check if expired (10 minutes)
             db.session.delete(url_entry)
             db.session.commit()
+            app.logger.info(f"URL with code {code} has expired and was deleted.")
             return jsonify({'message': 'URL has expired and has been deleted.'}), 410
-    
         return jsonify({'original_url': url_entry.original_url, 'expires_in': expiry_time}), 200  
     # Expires in 10 minutes (600 seconds)
     else:
+        app.logger.info(f"URL with code {code} not found.")
         return jsonify({'message': 'URL not found for the provided code.'}), 404
     
     
@@ -111,11 +118,14 @@ def retrieve_url(code):
 def delete_expired_urls():
     now = datetime.datetime.utcnow()
     expired_urls = URL.query.filter(URL.created_at < (now - datetime.timedelta(minutes=10))).all()
-    
+    app.logger.info(f"Checking for expired URLs at {now}. Found {len(expired_urls)} expired URLs.")
     for url in expired_urls:
         db.session.delete(url)
+        app.logger.info(f"Deleted expired URL: {url.original_url} with code: {url.code}")
     
     db.session.commit()
+    app.logger.info("Expired URLs deletion completed.")
+
 
 
   

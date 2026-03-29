@@ -12,9 +12,14 @@ A beautiful, modern frontend for a link to Television service using Tailwind CSS
 ## Getting Started
 
 1. **Clone the repository**
-2. **Open `index.html` in your browser**
+2. **Build and run with Docker**
+   ```sh
+   docker build -t link-shortener .
+   docker run -p 5000:5000 link-shortener
+   ```
+   The app will be available at http://localhost:5000
 3. **Configure AJAX endpoints**
-   - Update the URLs in the jQuery AJAX calls to match your backend API endpoints (e.g., `/api/generate` and `/api/retrieve`).
+   - The frontend is preconfigured to use `/api/generate` and `/api/retrieve` which are handled by the backend.
 
 ## Requirements
 - [Tailwind CSS CDN](https://cdn.tailwindcss.com/)
