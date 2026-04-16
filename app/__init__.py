@@ -132,6 +132,6 @@ def delete_expired_urls():
 
 if __name__ == "__main__":
      app.logger.info("Starting the Flask application...")
-     app.run(debug=True)
+     app.run(debug=False)
 
 
